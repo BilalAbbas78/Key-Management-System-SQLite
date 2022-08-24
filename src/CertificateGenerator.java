@@ -86,7 +86,7 @@ public class CertificateGenerator {
         }
     }
 
-    public static void exportCertificate(X509Certificate certificate, String filePath) throws CertificateEncodingException, IOException {
+    public static void exportCertificate(X509Certificate certificate, String filePath, String privateKey) throws CertificateEncodingException, IOException {
         final FileOutputStream os = new FileOutputStream(filePath + ".cer");
         os.write("-----BEGIN CERTIFICATE-----\n".getBytes("US-ASCII"));
         os.write(Base64.encode(certificate.getEncoded()));
@@ -94,7 +94,7 @@ public class CertificateGenerator {
         os.close();
 
         final FileOutputStream os2 = new FileOutputStream(filePath + "PrivateKey.txt");
-        os2.write(Base64.encode(privateKey.getEncoded()));
+        os2.write(privateKey.getBytes());
         os2.close();
     }
 
@@ -204,6 +204,17 @@ public class CertificateGenerator {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static X509Certificate getCertificateFromString(String certificateKey) {
+        try {
+            byte[] bytes = Base64.decode(certificateKey);
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(bytes));
+        } catch (CertificateException e) {
             e.printStackTrace();
             return null;
         }

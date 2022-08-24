@@ -2,10 +2,12 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.sql.*;
@@ -17,7 +19,7 @@ import java.util.Properties;
 
 public class FrmDashboard extends JFrame {
     static Connection connection;
-    static int selectedRootCertificateId = 0;
+    static int selectedRootCertificateId = 0, selectedClientCertificateId = 0;
     static ArrayList<Integer> selectedRootCertificateIds = new ArrayList<>();
 
     FrmDashboard() throws SQLException {
@@ -177,6 +179,7 @@ public class FrmDashboard extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 int row = tableRootCertificates.getSelectedRow();
                 selectedRootCertificateId = selectedRootCertificateIds.get(row);
+                selectedClientCertificateId = 0;
                 try {
                     setTableClientCertificates(tableClientCertificates);
                 } catch (SQLException ex) {
@@ -184,6 +187,13 @@ public class FrmDashboard extends JFrame {
                     throw new RuntimeException(ex);
                 }
 
+            }
+        });
+
+        tableClientCertificates.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                selectedClientCertificateId = tableClientCertificates.getSelectedRow() + 1;
             }
         });
 
@@ -205,7 +215,7 @@ public class FrmDashboard extends JFrame {
                     if (resultSet.next())
                         privateKey = CertificateGenerator.getPrivateKeyFromString(resultSet.getString("privateKey"));
 
-                    X509Certificate x509Certificate = CertificateGenerator.generateCertificateSignedX509Certificate(tableRootCertificates.getColumnName(0), txtClientName.getText(), 1, privateKey, validFrom, validTo);
+                    X509Certificate x509Certificate = CertificateGenerator.generateCertificateSignedX509Certificate(tableRootCertificates.getModel().getValueAt(tableRootCertificates.getSelectedRow(), 0).toString(), txtClientName.getText(), 1, privateKey, validFrom, validTo);
                     insertClientCertificateIntoDB(x509Certificate, CertificateGenerator.privateKey);
                     txtIssuerName.setText("");
                     datePickerValidFrom.getModel().setValue(null);
@@ -217,6 +227,56 @@ public class FrmDashboard extends JFrame {
                     setTableClientCertificates(tableClientCertificates);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        btnExportRootCertificate.addActionListener(e -> {
+            if (selectedRootCertificateId == 0)
+                JOptionPane.showMessageDialog(null, "Please select a Root Certificate");
+            else {
+                try {
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM RootCertificates WHERE certificateId = " + selectedRootCertificateId);
+                    X509Certificate certificate = null;
+//                    if (resultSet.next())
+                    certificate = CertificateGenerator.getCertificateFromString(resultSet.getString("certificateKey"));
+                    exportCertificate(certificate, resultSet.getString("issuerName"), resultSet.getString("privateKey"));
+
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+
+        btnExportClientCertificate.addActionListener(e -> {
+            if (selectedClientCertificateId == 0)
+                JOptionPane.showMessageDialog(null, "Please select a Client Certificate");
+            else {
+                try {
+
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM ClientCertificates WHERE rootCertificateId = " + selectedRootCertificateId + " AND clientName = '" + tableClientCertificates.getModel().getValueAt(tableClientCertificates.getSelectedRow(), 0) + "'" );
+
+                    if (resultSet.next()) {
+                        X509Certificate certificate = CertificateGenerator.getCertificateFromString(resultSet.getString("certificateKey"));
+                        exportCertificate(certificate, resultSet.getString("clientName"), resultSet.getString("privateKey"));
+                    }
+
+
+
+
+//                    Statement statement = connection.createStatement();
+//                    ResultSet resultSet = statement.executeQuery("SELECT * FROM ClientCertificates WHERE certificateId = " + selectedClientCertificateId);
+//                    X509Certificate certificate = null;
+//                    if (resultSet.next())
+//                        certificate = CertificateGenerator.getX509CertificateFromString(resultSet.getString("certificateKey"));
+//                    exportCertificate(certificate, resultSet.getString("clientName"), resultSet.getString("privateKey"));
+
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    throw new RuntimeException(ex);
                 }
             }
         });
@@ -310,6 +370,36 @@ public class FrmDashboard extends JFrame {
             connection = DriverManager.getConnection("jdbc:sqlite:KMS.db");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        }
+    }
+
+    void exportCertificate(X509Certificate certificate, String fileName, String privateKey) {
+        try {
+            // parent component of the dialog
+            JFrame parentFrame = new JFrame();
+            JFileChooser fileChooser = new JFileChooser(System.getProperty("user.home") + "\\Desktop");
+            fileChooser.setDialogTitle("Specify a file to save");
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            FileNameExtensionFilter filter = new FileNameExtensionFilter("Certificate File", "cer");
+            fileChooser.setFileFilter(filter);
+
+            File f = new File(fileName);
+            fileChooser.setSelectedFile(f);
+
+            int userSelection = fileChooser.showSaveDialog(parentFrame);
+
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = fileChooser.getSelectedFile();
+                CertificateGenerator.exportCertificate(certificate, fileToSave.getAbsolutePath(), privateKey);
+                JOptionPane.showMessageDialog(this, "Certificate Exported Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+            }
+            else {
+                System.out.println("Save command cancelled by user.");
+            }
+        }
+        catch (Exception e1) {
+            e1.printStackTrace();
+            JOptionPane.showMessageDialog(this, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
