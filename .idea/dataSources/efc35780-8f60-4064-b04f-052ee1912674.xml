@@ -1314,34 +1314,55 @@
       <Position>1</Position>
     </argument>
     <table id="482" parent="166" name="Credentials"/>
-    <table id="483" parent="166" name="sqlite_master">
+    <table id="483" parent="166" name="RootCertificates"/>
+    <table id="484" parent="166" name="sqlite_master">
       <System>1</System>
     </table>
-    <column id="484" parent="482" name="name">
+    <column id="485" parent="482" name="name">
       <DataType>string|0s</DataType>
       <Position>1</Position>
     </column>
-    <column id="485" parent="482" name="password">
+    <column id="486" parent="482" name="password">
       <DataType>string|0s</DataType>
       <Position>2</Position>
     </column>
-    <column id="486" parent="483" name="type">
+    <column id="487" parent="483" name="certificate">
+      <DataType>string|0s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="488" parent="483" name="issuer">
+      <DataType>string|0s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="489" parent="483" name="validFrom">
+      <DataType>string|0s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="490" parent="483" name="validTo">
+      <DataType>string|0s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="491" parent="483" name="privateKey">
+      <DataType>string|0s</DataType>
+      <Position>5</Position>
+    </column>
+    <column id="492" parent="484" name="type">
       <DataType>TEXT|0s</DataType>
       <Position>1</Position>
     </column>
-    <column id="487" parent="483" name="name">
+    <column id="493" parent="484" name="name">
       <DataType>TEXT|0s</DataType>
       <Position>2</Position>
     </column>
-    <column id="488" parent="483" name="tbl_name">
+    <column id="494" parent="484" name="tbl_name">
       <DataType>TEXT|0s</DataType>
       <Position>3</Position>
     </column>
-    <column id="489" parent="483" name="rootpage">
+    <column id="495" parent="484" name="rootpage">
       <DataType>INT|0s</DataType>
       <Position>4</Position>
     </column>
-    <column id="490" parent="483" name="sql">
+    <column id="496" parent="484" name="sql">
       <DataType>TEXT|0s</DataType>
       <Position>5</Position>
     </column>
