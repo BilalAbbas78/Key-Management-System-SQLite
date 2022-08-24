@@ -5,7 +5,7 @@ import java.util.Calendar;
 
 public class DateLabelFormatter extends AbstractFormatter {
 
-	private final String datePattern = "yyyy-MM-dd";
+	private final String datePattern = "dd MMMM yyyy";
 	private final SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
 	
 	@Override

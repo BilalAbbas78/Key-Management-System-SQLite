@@ -4,11 +4,21 @@ import org.jdatepicker.impl.UtilDateModel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Properties;
 
 public class FrmDashboard extends JFrame {
     static Connection connection;
+    static int selectedRootCertificateId = 0;
+    static ArrayList<Integer> selectedRootCertificateIds = new ArrayList<>();
 
     FrmDashboard() throws SQLException {
         setTitle("Dashboard");
@@ -26,10 +36,10 @@ public class FrmDashboard extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setBounds(20, 60, 500, 350);
-        JTable table = new JTable();
-        scrollPane.setViewportView(table);
+        JTable tableRootCertificates = new JTable();
+        scrollPane.setViewportView(tableRootCertificates);
         add(scrollPane);
-        setTableRootCertificates(table);
+        setTableRootCertificates(tableRootCertificates);
 
         JButton btnExportRootCertificate = new JButton("Export Root Certificate");
         btnExportRootCertificate.setBounds(320, 420, 200, 30);
@@ -45,9 +55,9 @@ public class FrmDashboard extends JFrame {
         lblIssuerName.setBounds(20, 520, 100, 30);
         add(lblIssuerName);
 
-        JTextField txtIssuer = new JTextField();
-        txtIssuer.setBounds(120, 520, 200, 30);
-        add(txtIssuer);
+        JTextField txtIssuerName = new JTextField();
+        txtIssuerName.setBounds(120, 520, 200, 30);
+        add(txtIssuerName);
 
         JLabel lblValidFrom = new JLabel("Valid From:");
         lblValidFrom.setBounds(20, 560, 100, 30);
@@ -78,6 +88,7 @@ public class FrmDashboard extends JFrame {
 
 
 
+
         // Client Certificate
 
         JLabel lblClientCertificates = new JLabel("Client Certificates");
@@ -90,7 +101,7 @@ public class FrmDashboard extends JFrame {
         JTable tableClientCertificates = new JTable();
         scrollPaneClientCertificates.setViewportView(tableClientCertificates);
         add(scrollPaneClientCertificates);
-//        setTableClientCertificates(tableClientCertificates);
+        setTableClientCertificates(tableClientCertificates);
 
         JButton btnExportClientCertificate = new JButton("Export Client Certificate");
         btnExportClientCertificate.setBounds(690, 420, 200, 30);
@@ -137,6 +148,79 @@ public class FrmDashboard extends JFrame {
         btnAddClientCertificate.setBounds(690, 640, 200, 30);
         add(btnAddClientCertificate);
 
+        btnAddRootCertificate.addActionListener(e -> {
+            String issuerName = txtIssuerName.getText().trim();
+            if (issuerName.isEmpty() || datePickerValidFrom.getModel().getValue() == null || datePickerValidTo.getModel().getValue() == null) {
+                JOptionPane.showMessageDialog(null, "Please fill all fields");
+            } else {
+                try {
+                    String validFrom = datePickerValidFrom.getModel().getValue().toString();
+                    String validTo = datePickerValidTo.getModel().getValue().toString();
+                    X509Certificate selfSignedX509Certificate = CertificateGenerator.generateSelfSignedX509Certificate(issuerName, validFrom, validTo);
+                    insertRootCertificateIntoDB(selfSignedX509Certificate, CertificateGenerator.privateKey);
+                    txtIssuerName.setText("");
+                    datePickerValidFrom.getModel().setValue(null);
+                    datePickerValidTo.getModel().setValue(null);
+                    txtClientName.setText("");
+                    datePickerValidFromClientCertificate.getModel().setValue(null);
+                    datePickerValidToClientCertificate.getModel().setValue(null);
+                    JOptionPane.showMessageDialog(this, "Root Certificate Generated Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    setTableRootCertificates(tableRootCertificates);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
+        tableRootCertificates.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tableRootCertificates.getSelectedRow();
+                selectedRootCertificateId = selectedRootCertificateIds.get(row);
+                try {
+                    setTableClientCertificates(tableClientCertificates);
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    throw new RuntimeException(ex);
+                }
+
+            }
+        });
+
+        btnAddClientCertificate.addActionListener(e -> {
+            String clientName = txtClientName.getText().trim();
+            if (clientName.isEmpty() || datePickerValidFromClientCertificate.getModel().getValue() == null || datePickerValidToClientCertificate.getModel().getValue() == null) {
+                JOptionPane.showMessageDialog(null, "Please fill all fields");
+            }
+            else if (selectedRootCertificateId == 0)
+                JOptionPane.showMessageDialog(null, "Please select a Root Certificate");
+            else {
+                try {
+                    String validFrom = datePickerValidFromClientCertificate.getModel().getValue().toString();
+                    String validTo = datePickerValidToClientCertificate.getModel().getValue().toString();
+
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM RootCertificates WHERE certificateId = " + selectedRootCertificateId);
+                    PrivateKey privateKey = null;
+                    if (resultSet.next())
+                        privateKey = CertificateGenerator.getPrivateKeyFromString(resultSet.getString("privateKey"));
+
+                    X509Certificate x509Certificate = CertificateGenerator.generateCertificateSignedX509Certificate(tableRootCertificates.getColumnName(0), txtClientName.getText(), 1, privateKey, validFrom, validTo);
+                    insertClientCertificateIntoDB(x509Certificate, CertificateGenerator.privateKey);
+                    txtIssuerName.setText("");
+                    datePickerValidFrom.getModel().setValue(null);
+                    datePickerValidTo.getModel().setValue(null);
+                    txtClientName.setText("");
+                    datePickerValidFromClientCertificate.getModel().setValue(null);
+                    datePickerValidToClientCertificate.getModel().setValue(null);
+                    JOptionPane.showMessageDialog(this, "Client Certificate Generated Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    setTableClientCertificates(tableClientCertificates);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                }
+            }
+        });
+
 
 
 
@@ -145,16 +229,76 @@ public class FrmDashboard extends JFrame {
 
     }
 
+    private void insertClientCertificateIntoDB(X509Certificate certificate, PrivateKey privateKey) {
+        try {
+            String clientCertificateKey = Base64.getEncoder().encodeToString(certificate.getEncoded());
+            String clientName = certificate.getSubjectDN().getName().replaceFirst("DN=", "").trim();
+            DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+            String validFrom = dateFormat.format(certificate.getNotBefore());
+            String validTo = dateFormat.format(certificate.getNotAfter());
+            String sql = "INSERT INTO ClientCertificates VALUES (?, ?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, clientCertificateKey);
+            preparedStatement.setString(2, clientName);
+            preparedStatement.setString(3, validFrom);
+            preparedStatement.setString(4, validTo);
+            preparedStatement.setInt(5, selectedRootCertificateId);
+            preparedStatement.setString(6, Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+            preparedStatement.executeUpdate();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private void insertRootCertificateIntoDB(X509Certificate selfSignedX509Certificate, PrivateKey privateKey) {
+        try {
+            String rootCertificateKey = Base64.getEncoder().encodeToString(selfSignedX509Certificate.getEncoded());
+            String issuerName = selfSignedX509Certificate.getIssuerX500Principal().getName().replaceFirst("CN=", "").trim();
+            DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+            String validFrom = dateFormat.format(selfSignedX509Certificate.getNotBefore());
+            String validTo = dateFormat.format(selfSignedX509Certificate.getNotAfter());
+            String sql = "INSERT INTO RootCertificates (certificateKey, issuerName, validFrom, validTo, privateKey) VALUES (?, ?, ?, ?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, rootCertificateKey);
+            preparedStatement.setString(2, issuerName);
+            preparedStatement.setString(3, validFrom);
+            preparedStatement.setString(4, validTo);
+            preparedStatement.setString(5, Base64.getEncoder().encodeToString(privateKey.getEncoded()));
+            preparedStatement.executeUpdate();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static void setTableClientCertificates(JTable table) throws SQLException {
+        DefaultTableModel model = new DefaultTableModel();
+        model.addColumn("Client Name");
+        model.addColumn("Valid From");
+        model.addColumn("Valid To");
+        table.setModel(model);
+
+        Statement statement = connection.createStatement();
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM ClientCertificates WHERE rootCertificateId = " + selectedRootCertificateId);
+        while (resultSet.next()) {
+            model.addRow(new Object[]{resultSet.getString("ClientName"), resultSet.getString("ValidFrom"), resultSet.getString("ValidTo")});
+        }
+        table.setModel(model);
+    }
+
     public static void setTableRootCertificates(JTable table) throws SQLException {
         DefaultTableModel model = new DefaultTableModel();
-        model.addColumn("Issuer");
+        model.addColumn("Issuer Name");
         model.addColumn("Valid From");
         model.addColumn("Valid To");
 
         Statement statement = connection.createStatement();
         ResultSet resultSet = statement.executeQuery("select * from RootCertificates");
+        selectedRootCertificateIds.clear();
         while (resultSet.next()) {
-            model.addRow(new Object[]{resultSet.getString("Issuer"), resultSet.getString("ValidFrom"), resultSet.getString("ValidTo")});
+            selectedRootCertificateIds.add(resultSet.getInt("certificateId"));
+            model.addRow(new Object[]{resultSet.getString("IssuerName"), resultSet.getString("ValidFrom"), resultSet.getString("ValidTo")});
         }
         table.setModel(model);
     }

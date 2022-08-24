@@ -5,7 +5,6 @@ import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-
 import javax.security.auth.x500.X500Principal;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -156,6 +155,7 @@ public class CertificateGenerator {
                 new ExtendedKeyUsage(KeyPurposeId.id_kp_timeStamping));
 
         // finally, sign the certificate with the private key of the same KeyPair
+        privateKey = keyPair.getPrivate();
         return certGen.generate(issuerPrivateKey, "BC");
     }
 

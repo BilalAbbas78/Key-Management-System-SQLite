@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9956df67-c140-461e-bbdc-d60c88cfae49" name="Changes" comment="Certificate verification completed">
-      <change afterPath="$PROJECT_DIR$/src/DateLabelFormatter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/JDatePickerDemo.java" afterDir="false" />
+    <list default="true" id="9956df67-c140-461e-bbdc-d60c88cfae49" name="Changes" comment="GUI Made">
       <change beforePath="$PROJECT_DIR$/.idea/dataSources/efc35780-8f60-4064-b04f-052ee1912674.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/efc35780-8f60-4064-b04f-052ee1912674.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/KMS.db" beforeDir="false" afterPath="$PROJECT_DIR$/KMS.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CertificateGenerator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/CertificateGenerator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DateLabelFormatter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DateLabelFormatter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FrmDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrmDashboard.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -80,7 +80,7 @@
       <option name="presentableId" value="Default" />
       <updated>1661321513996</updated>
       <workItem from="1661321515906" duration="9897000" />
-      <workItem from="1661367458773" duration="2852000" />
+      <workItem from="1661367458773" duration="10797000" />
     </task>
     <task id="LOCAL-00001" summary="Certificate verification completed">
       <created>1661329633493</created>
@@ -89,7 +89,14 @@
       <option name="project" value="LOCAL" />
       <updated>1661329633493</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="GUI Made">
+      <created>1661370410694</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1661370410694</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -108,6 +115,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Certificate verification completed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Certificate verification completed" />
+    <MESSAGE value="GUI Made" />
+    <option name="LAST_COMMIT_MESSAGE" value="GUI Made" />
   </component>
 </project>

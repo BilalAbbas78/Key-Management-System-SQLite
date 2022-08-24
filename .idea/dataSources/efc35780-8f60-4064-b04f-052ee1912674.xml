@@ -1313,58 +1313,106 @@
     <argument id="481" parent="165">
       <Position>1</Position>
     </argument>
-    <table id="482" parent="166" name="Credentials"/>
-    <table id="483" parent="166" name="RootCertificates"/>
-    <table id="484" parent="166" name="sqlite_master">
+    <table id="482" parent="166" name="ClientCertificates"/>
+    <table id="483" parent="166" name="Credentials"/>
+    <table id="484" parent="166" name="RootCertificates"/>
+    <table id="485" parent="166" name="sqlite_master">
       <System>1</System>
     </table>
-    <column id="485" parent="482" name="name">
+    <table id="486" parent="166" name="sqlite_sequence">
+      <System>1</System>
+    </table>
+    <column id="487" parent="482" name="certificateKey">
       <DataType>string|0s</DataType>
       <Position>1</Position>
     </column>
-    <column id="486" parent="482" name="password">
+    <column id="488" parent="482" name="clientName">
       <DataType>string|0s</DataType>
       <Position>2</Position>
     </column>
-    <column id="487" parent="483" name="certificate">
-      <DataType>string|0s</DataType>
-      <Position>1</Position>
-    </column>
-    <column id="488" parent="483" name="issuer">
-      <DataType>string|0s</DataType>
-      <Position>2</Position>
-    </column>
-    <column id="489" parent="483" name="validFrom">
+    <column id="489" parent="482" name="validFrom">
       <DataType>string|0s</DataType>
       <Position>3</Position>
     </column>
-    <column id="490" parent="483" name="validTo">
+    <column id="490" parent="482" name="validTo">
       <DataType>string|0s</DataType>
       <Position>4</Position>
     </column>
-    <column id="491" parent="483" name="privateKey">
+    <column id="491" parent="482" name="rootCertificateId">
+      <DataType>INTEGER|0s</DataType>
+      <Position>5</Position>
+    </column>
+    <column id="492" parent="482" name="privateKey">
+      <DataType>string|0s</DataType>
+      <Position>6</Position>
+    </column>
+    <foreign-key id="493" parent="482">
+      <ColNames>rootCertificateId</ColNames>
+      <RefColNames>certificateId</RefColNames>
+      <RefTableName>RootCertificates</RefTableName>
+    </foreign-key>
+    <column id="494" parent="483" name="name">
+      <DataType>string|0s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="495" parent="483" name="password">
+      <DataType>string|0s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="496" parent="484" name="certificateId">
+      <AutoIncrement>1</AutoIncrement>
+      <DataType>INTEGER|0s</DataType>
+      <Position>1</Position>
+    </column>
+    <column id="497" parent="484" name="certificateKey">
+      <DataType>string|0s</DataType>
+      <Position>2</Position>
+    </column>
+    <column id="498" parent="484" name="issuerName">
+      <DataType>string|0s</DataType>
+      <Position>3</Position>
+    </column>
+    <column id="499" parent="484" name="validFrom">
+      <DataType>string|0s</DataType>
+      <Position>4</Position>
+    </column>
+    <column id="500" parent="484" name="validTo">
       <DataType>string|0s</DataType>
       <Position>5</Position>
     </column>
-    <column id="492" parent="484" name="type">
+    <column id="501" parent="484" name="privateKey">
+      <DataType>string|0s</DataType>
+      <Position>6</Position>
+    </column>
+    <key id="502" parent="484">
+      <ColNames>certificateId</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="503" parent="485" name="type">
       <DataType>TEXT|0s</DataType>
       <Position>1</Position>
     </column>
-    <column id="493" parent="484" name="name">
+    <column id="504" parent="485" name="name">
       <DataType>TEXT|0s</DataType>
       <Position>2</Position>
     </column>
-    <column id="494" parent="484" name="tbl_name">
+    <column id="505" parent="485" name="tbl_name">
       <DataType>TEXT|0s</DataType>
       <Position>3</Position>
     </column>
-    <column id="495" parent="484" name="rootpage">
+    <column id="506" parent="485" name="rootpage">
       <DataType>INT|0s</DataType>
       <Position>4</Position>
     </column>
-    <column id="496" parent="484" name="sql">
+    <column id="507" parent="485" name="sql">
       <DataType>TEXT|0s</DataType>
       <Position>5</Position>
+    </column>
+    <column id="508" parent="486" name="name">
+      <Position>1</Position>
+    </column>
+    <column id="509" parent="486" name="seq">
+      <Position>2</Position>
     </column>
   </database-model>
 </dataSource>
