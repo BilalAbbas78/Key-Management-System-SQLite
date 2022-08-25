@@ -17,6 +17,16 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Properties;
 
+class ClientCertificate {
+    X509Certificate certificate;
+    String clientName, privateKey;
+    ClientCertificate(X509Certificate certificate, String clientName, String PrivateKey) {
+        this.certificate = certificate;
+        this.clientName = clientName;
+        this.privateKey = PrivateKey;
+    }
+}
+
 public class FrmDashboard extends JFrame {
     static Connection connection;
     static int selectedRootCertificateId = 0, selectedClientCertificateId = 0;
@@ -151,6 +161,34 @@ public class FrmDashboard extends JFrame {
         btnAddClientCertificate.setBounds(690, 640, 200, 30);
         add(btnAddClientCertificate);
 
+
+
+        // extras
+
+        JButton btnChangePassword = new JButton("Change Password");
+        btnChangePassword.setBounds(1320, 20, 200, 30);
+        add(btnChangePassword);
+
+        JButton btnVerifyCertificates = new JButton("Verify Certificates");
+        btnVerifyCertificates.setBounds(1320, 60, 200, 30);
+        add(btnVerifyCertificates);
+
+        btnChangePassword.addActionListener(e -> {
+            try {
+                new FrmChangePassword().setVisible(true);
+            } catch (ClassNotFoundException ex) {
+                JOptionPane.showMessageDialog(null, "ClassNotFoundException: " + ex.getMessage());
+                throw new RuntimeException(ex);
+            }
+        });
+
+        btnVerifyCertificates.addActionListener(e -> {
+            new FrmVerifyCertificate().setVisible(true);
+        });
+
+
+
+
         btnAddRootCertificate.addActionListener(e -> {
             String issuerName = txtIssuerName.getText().trim();
             if (issuerName.isEmpty() || datePickerValidFrom.getModel().getValue() == null || datePickerValidTo.getModel().getValue() == null) {
@@ -282,6 +320,27 @@ public class FrmDashboard extends JFrame {
             }
         });
 
+        btnExportAllClientCertificates.addActionListener(e -> {
+            ArrayList<ClientCertificate> clientCertificatesList = new ArrayList<>();
+            if (selectedRootCertificateId == 0)
+                JOptionPane.showMessageDialog(null, "Please select a Root Certificate");
+            else {
+                try {
+                    Statement statement = connection.createStatement();
+                    ResultSet resultSet = statement.executeQuery("SELECT * FROM ClientCertificates WHERE rootCertificateId = " + selectedRootCertificateId);
+                    while (resultSet.next()) {
+                        X509Certificate certificate = CertificateGenerator.getCertificateFromString(resultSet.getString("certificateKey"));
+                        clientCertificatesList.add(new ClientCertificate(certificate, resultSet.getString("clientName"), resultSet.getString("privateKey")));
+//                        exportCertificate(certificate, resultSet.getString("clientName"), resultSet.getString("privateKey"));
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+                    throw new RuntimeException(ex);
+                }
+                exportAllCertificates(clientCertificatesList);
+            }
+        });
+
 
 
 
@@ -384,8 +443,28 @@ public class FrmDashboard extends JFrame {
                 CertificateGenerator.exportCertificate(certificate, fileToSave.getAbsolutePath(), privateKey);
                 JOptionPane.showMessageDialog(this, "Certificate Exported Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
-            else {
-                System.out.println("Save command cancelled by user.");
+        }
+        catch (Exception e1) {
+            e1.printStackTrace();
+            JOptionPane.showMessageDialog(this, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    void exportAllCertificates(ArrayList<ClientCertificate> clientCertificates) {
+        try {
+            // parent component of the dialog
+            JFrame parentFrame = new JFrame();
+            JFileChooser fileChooser = new JFileChooser(System.getProperty("user.home") + "\\Desktop");
+            fileChooser.setDialogTitle("Specify a directory to save all certificates");
+            fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY);
+
+            int userSelection = fileChooser.showSaveDialog(parentFrame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+
+                for (ClientCertificate clientCertificate : clientCertificates) {
+                    File fileToSave = new File(fileChooser.getSelectedFile().getAbsolutePath() + "\\" + clientCertificate.clientName);
+                    CertificateGenerator.exportCertificate(clientCertificate.certificate, fileToSave.getAbsolutePath(), clientCertificate.privateKey);
+                }
+                JOptionPane.showMessageDialog(this, "Certificates Exported Successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
             }
         }
         catch (Exception e1) {

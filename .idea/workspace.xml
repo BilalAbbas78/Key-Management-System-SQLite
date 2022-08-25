@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9956df67-c140-461e-bbdc-d60c88cfae49" name="Changes" comment="Certificate Export added">
-      <change afterPath="$PROJECT_DIR$/src/FrmChangePassword.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/GlobalClass.java" afterDir="false" />
+    <list default="true" id="9956df67-c140-461e-bbdc-d60c88cfae49" name="Changes" comment="Global Class added">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/KMS.db" beforeDir="false" afterPath="$PROJECT_DIR$/KMS.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/FrmDashboard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrmDashboard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FrmLogin.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FrmLogin.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -81,7 +77,7 @@
       <updated>1661321513996</updated>
       <workItem from="1661321515906" duration="9897000" />
       <workItem from="1661367458773" duration="15620000" />
-      <workItem from="1661425362810" duration="1233000" />
+      <workItem from="1661425362810" duration="3372000" />
     </task>
     <task id="LOCAL-00001" summary="Certificate verification completed">
       <created>1661329633493</created>
@@ -111,7 +107,14 @@
       <option name="project" value="LOCAL" />
       <updated>1661384123634</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Global Class added">
+      <created>1661426610032</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1661426610032</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -133,6 +136,7 @@
     <MESSAGE value="GUI Made" />
     <MESSAGE value="Add Root and Client certificates added" />
     <MESSAGE value="Certificate Export added" />
-    <option name="LAST_COMMIT_MESSAGE" value="Certificate Export added" />
+    <MESSAGE value="Global Class added" />
+    <option name="LAST_COMMIT_MESSAGE" value="Global Class added" />
   </component>
 </project>
