@@ -22,7 +22,8 @@ public class FrmDashboard extends JFrame {
     static int selectedRootCertificateId = 0, selectedClientCertificateId = 0;
     static ArrayList<Integer> selectedRootCertificateIds = new ArrayList<>();
 
-    FrmDashboard() throws SQLException {
+    FrmDashboard() throws SQLException, ClassNotFoundException {
+        connection = GlobalClass.connect();
         setTitle("Dashboard");
         setSize(600, 350);
         setLocationRelativeTo(null);
@@ -363,16 +364,6 @@ public class FrmDashboard extends JFrame {
         table.setModel(model);
     }
 
-    public static void connect() throws ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
-        connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:sqlite:KMS.db");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     void exportCertificate(X509Certificate certificate, String fileName, String privateKey) {
         try {
             // parent component of the dialog
@@ -404,7 +395,6 @@ public class FrmDashboard extends JFrame {
     }
 
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        connect();
         new FrmDashboard().setVisible(true);
     }
 }

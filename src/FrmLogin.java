@@ -6,7 +6,8 @@ public class FrmLogin extends JFrame {
 
     static Connection connection;
 
-    FrmLogin(){
+    FrmLogin() throws ClassNotFoundException {
+        connection = GlobalClass.connect();
         setTitle("Login Form");
         setSize(600, 350);
         setLocationRelativeTo(null);
@@ -73,18 +74,7 @@ public class FrmLogin extends JFrame {
         }
     }
 
-    public static void connect() throws ClassNotFoundException {
-        Class.forName("org.sqlite.JDBC");
-        connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:sqlite:KMS.db");
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
     public static void main(String[] args) throws ClassNotFoundException {
-        connect();
         new FrmLogin().setVisible(true);
     }
 }
